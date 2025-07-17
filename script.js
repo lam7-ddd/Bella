@@ -1,16 +1,16 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    // --- 加载屏幕处理 ---
+    // --- ローディング画面の処理 ---
     const loadingScreen = document.getElementById('loading-screen');
     setTimeout(() => {
         loadingScreen.style.opacity = '0';
-        // 在动画结束后将其隐藏，以防它阻碍交互
+        // アニメーション終了後に非表示にし、インタラクションを妨げないようにする
         setTimeout(() => {
             loadingScreen.style.display = 'none';
-        }, 500); // 这个时间应该匹配 CSS 中的 transition 时间
-    }, 1500); // 1.5秒后开始淡出
+        }, 500); // この時間はCSSのtransition時間と一致させる必要があります
+    }, 1500); // 1.5秒後にフェードアウトを開始
     
-    // 获取需要的 DOM 元素
+    // 必要なDOM要素を取得
     let video1 = document.getElementById('video1');
     let video2 = document.getElementById('video2');
     const micButton = document.getElementById('mic-button');
@@ -19,19 +19,19 @@ document.addEventListener('DOMContentLoaded', function() {
     let activeVideo = video1;
     let inactiveVideo = video2;
 
-    // 视频列表
+    // ビデオリスト
     const videoList = [
-        '视频资源/3D 建模图片制作.mp4',
-        '视频资源/jimeng-2025-07-16-1043-笑着优雅的左右摇晃，过一会儿手扶着下巴，保持微笑.mp4',
-        '视频资源/jimeng-2025-07-16-4437-比耶，然后微笑着优雅的左右摇晃.mp4',
-        '视频资源/生成加油视频.mp4',
-        '视频资源/生成跳舞视频.mp4',
-        '视频资源/负面/jimeng-2025-07-16-9418-双手叉腰，嘴巴一直在嘟囔，表情微微生气.mp4'
+        'video_assets/3d_model_intro.mp4',
+        'video_assets/smile_and_sway.mp4',
+        'video_assets/v-sign_and_sway.mp4',
+        'video_assets/cheering_video.mp4',
+        'video_assets/dancing_video.mp4',
+        'video_assets/negative/angry_muttering.mp4'
     ];
 
-    // --- 视频交叉淡入淡出播放功能 ---
+    // --- ビデオのクロスフェード再生機能 ---
     function switchVideo() {
-        // 1. 选择下一个视频
+        // 1. 次のビデオを選択
         const currentVideoSrc = activeVideo.querySelector('source').getAttribute('src');
         let nextVideoSrc = currentVideoSrc;
         while (nextVideoSrc === currentVideoSrc) {
@@ -39,46 +39,46 @@ document.addEventListener('DOMContentLoaded', function() {
             nextVideoSrc = videoList[randomIndex];
         }
 
-        // 2. 设置不活动的 video 元素的 source
+        // 2. 非アクティブなvideo要素のsourceを設定
         inactiveVideo.querySelector('source').setAttribute('src', nextVideoSrc);
         inactiveVideo.load();
 
-        // 3. 当不活动的视频可以播放时，执行切换
+        // 3. 非アクティブなビデオが再生可能になったら、切り替えを実行
         inactiveVideo.addEventListener('canplaythrough', function onCanPlayThrough() {
-            // 确保事件只触发一次
+            // イベントが一度だけ発火するようにする
             inactiveVideo.removeEventListener('canplaythrough', onCanPlayThrough);
 
-            // 4. 播放新视频
+            // 4. 新しいビデオを再生
             inactiveVideo.play().catch(error => {
                 console.error("Video play failed:", error);
             });
 
-            // 5. 切换 active class 来触发 CSS 过渡
+            // 5. activeクラスを切り替えてCSSトランジションを発火させる
             activeVideo.classList.remove('active');
             inactiveVideo.classList.add('active');
 
-            // 6. 更新角色
+            // 6. 役割を更新
             [activeVideo, inactiveVideo] = [inactiveVideo, activeVideo];
 
-            // 为新的 activeVideo 绑定 ended 事件
+            // 新しいactiveVideoにendedイベントをバインドする
             activeVideo.addEventListener('ended', switchVideo, { once: true });
-        }, { once: true }); // 使用 { once: true } 确保事件只被处理一次
+        }, { once: true }); // { once: true } を使用して、イベントが一度だけ処理されるようにする
     }
 
-    // 初始启动
+    // 初期起動
     activeVideo.addEventListener('ended', switchVideo, { once: true });
 
 
-    // --- 语音识别核心 ---
+    // --- 音声認識のコア ---
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition;
 
-    // 检查浏览器是否支持语音识别
+    // ブラウザが音声認識をサポートしているか確認
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
-        recognition.continuous = true; // 持续识别
-        recognition.lang = 'zh-CN'; // 设置语言为中文
-        recognition.interimResults = true; // 获取临时结果
+        recognition.continuous = true; // 継続的に認識
+        recognition.lang = 'ja-JP'; // 言語を日本語に設定
+        recognition.interimResults = true; // 仮の結果を取得
 
         recognition.onresult = (event) => {
             const transcriptContainer = document.getElementById('transcript');
@@ -93,29 +93,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // 显示最终识别结果
+            // 最終的な認識結果を表示
             transcriptContainer.textContent = final_transcript || interim_transcript;
             
-            // 基于关键词的情感分析和视频切换
+            // キーワードに基づく感情分析とビデオ切り替え
             if (final_transcript) {
                 analyzeAndReact(final_transcript);
             }
         };
 
         recognition.onerror = (event) => {
-            console.error('语音识别错误:', event.error);
+            console.error('音声認識エラー:', event.error);
         };
 
     } else {
-        console.log('您的浏览器不支持语音识别功能。');
-        // 可以在界面上给用户提示
+        console.log('お使いのブラウザは音声認識機能に対応していません。');
+        // UI上でユーザーにヒントを表示することも可能
     }
 
-    // --- 麦克风按钮交互 ---
+    // --- マイクボタンのインタラクション ---
     let isListening = false;
 
     micButton.addEventListener('click', function() {
-        if (!SpeechRecognition) return; // 如果不支持，则不执行任何操作
+        if (!SpeechRecognition) return; // サポートされていない場合は何もしない
 
         isListening = !isListening;
         micButton.classList.toggle('is-listening', isListening);
@@ -123,31 +123,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const transcriptText = document.getElementById('transcript');
 
         if (isListening) {
-            transcriptText.textContent = '聆听中...'; // 立刻显示提示
+            transcriptText.textContent = '聞いています...'; // すぐにヒントを表示
             transcriptContainer.classList.add('visible');
             recognition.start();
         } else {
             recognition.stop();
             transcriptContainer.classList.remove('visible');
-            transcriptText.textContent = ''; // 清空文本
+            transcriptText.textContent = ''; // テキストをクリア
         }
     });
 
 
-    // --- 情感分析与反应 ---
-    const positiveWords = ['开心', '高兴', '喜欢', '太棒了', '你好', '漂亮'];
-    const negativeWords = ['难过', '生气', '讨厌', '伤心'];
+    // --- 感情分析と反応 ---
+    const positiveWords = ['嬉しい', '楽しい', '好き', '最高', 'こんにちは', '綺麗', 'かわいい'];
+    const negativeWords = ['悲しい', '怒ってる', '嫌い', '辛い', '最悪'];
 
     const positiveVideos = [
-        '视频资源/jimeng-2025-07-16-1043-笑着优雅的左右摇晃，过一会儿手扶着下巴，保持微笑.mp4',
-        '视频资源/jimeng-2025-07-16-4437-比耶，然后微笑着优雅的左右摇晃.mp4',
-        '视频资源/生成加油视频.mp4',
-        '视频资源/生成跳舞视频.mp4'
+        'video_assets/smile_and_sway.mp4',
+        'video_assets/v-sign_and_sway.mp4',
+        'video_assets/cheering_video.mp4',
+        'video_assets/dancing_video.mp4'
     ];
-    const negativeVideo = '视频资源/负面/jimeng-2025-07-16-9418-双手叉腰，嘴巴一直在嘟囔，表情微微生气.mp4';
+    const negativeVideo = 'video_assets/negative/angry_muttering.mp4';
 
     function analyzeAndReact(text) {
-        let reaction = 'neutral'; // 默认为中性
+        let reaction = 'neutral'; // デフォルトはニュートラル
 
         if (positiveWords.some(word => text.includes(word))) {
             reaction = 'positive';
@@ -169,11 +169,11 @@ document.addEventListener('DOMContentLoaded', function() {
             nextVideoSrc = negativeVideo;
         }
 
-        // 避免重复播放同一个视频
+        // 同じビデオの繰り返し再生を避ける
         const currentVideoSrc = activeVideo.querySelector('source').getAttribute('src');
         if (nextVideoSrc === currentVideoSrc) return;
 
-        // --- 以下逻辑与 switchVideo 函数类似，用于切换视频 ---
+        // --- 以下のロジックはswitchVideo関数と似ており、ビデオの切り替えに使用 ---
         inactiveVideo.querySelector('source').setAttribute('src', nextVideoSrc);
         inactiveVideo.load();
 
@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
             activeVideo.classList.remove('active');
             inactiveVideo.classList.add('active');
             [activeVideo, inactiveVideo] = [inactiveVideo, activeVideo];
-            // 情感触发的视频播放结束后，回归随机播放
+            // 感情によってトリガーされたビデオの再生終了後、ランダム再生に戻る
             activeVideo.addEventListener('ended', switchVideo, { once: true });
         }, { once: true });
     }

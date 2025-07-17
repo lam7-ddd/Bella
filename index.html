@@ -1,49 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Assistant</title>
+    <title>ボイスアシスタント</title>
     <link rel="stylesheet" href="style.css">
-    <!-- 引入 Font Awesome 图标库，用于麦克风图标 -->
+    <!-- Font Awesome アイコンライブラリを読み込み、マイクアイコンに使用 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 
-    <!-- 加载屏幕 -->
+    <!-- ローディング画面 -->
     <div id="loading-screen">
         <img src="Bellaicon/Generated image.webp" alt="Loading Bella...">
     </div>
 
-    <!-- 视频背景 -->
+    <!-- ビデオ背景 -->
     <div class="video-container">
         <video autoplay muted class="bg-video active" id="video1">
-            <source src="视频资源/3D 建模图片制作.mp4" type="video/mp4">
-            Your browser does not support the video tag.
+            <source src="video_assets/3d_model_intro.mp4" type="video/mp4">
+            ご利用のブラウザはvideoタグをサポートしていません。
         </video>
         <video muted class="bg-video" id="video2">
             <source src="" type="video/mp4">
-            Your browser does not support the video tag.
+            ご利用のブラウザはvideoタグをサポートしていません。
         </video>
     </div>
 
-    <!-- 内容层，覆盖在视频之上 -->
+    <!-- コンテンツレイヤー、ビデオの上に重ねる -->
     <div class="content-overlay">
 
-        <!-- 顶部好感度条 -->
+        <!-- 上部の好感度バー -->
         <header class="top-bar">
-            <label for="favorability-bar">Favorability</label>
+            <label for="favorability-bar">好感度</label>
             <div class="progress-container">
                 <div class="progress-fill" id="favorability-bar"></div>
             </div>
         </header>
 
-        <!-- 语音识别结果显示区域 -->
+        <!-- 音声認識結果表示エリア -->
         <div class="transcript-container">
             <p id="transcript"></p>
         </div>
 
-        <!-- 底部麦克风和链接 -->
+        <!-- 下部のマイクとリンク -->
         <footer class="bottom-bar">
             <button class="mic-button" id="mic-button" aria-label="Start Listening">
                 <i class="fas fa-microphone"></i>
